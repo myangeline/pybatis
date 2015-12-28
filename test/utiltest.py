@@ -1,3 +1,5 @@
+import re
+
 from utils.xmlpaseutil import xml_parse
 
 __author__ = 'sunshine'
@@ -10,12 +12,24 @@ def test_xml_parse():
             select * from Blog where id = #{id}
           </select>
         </mapper>
+        <mapper namespace="org.mybatis.example.BlogMapper">
+          <select id="selectBlog" resultType="Blog">
+            select * from Blog where id = #{id}
+          </select>
+        </mapper>
     '''
-    js = xml_parse(doc)
-    print(js)
-    print(js['mapper'])
-    print(js['mapper']['@namespace'])
-    print(js['mapper']['select'])
+    # doc = doc.replace('\r', '').replace('\n', '').strip()
+    print(doc)
+    pattern = r"(<mapper.*?</mapper>)"
+    pattern = re.compile(pattern, re.S)
+    mappers = pattern.findall(doc)
+    print(mappers)
+    for mapper in mappers:
+        js = xml_parse(mapper)
+        print(js)
+        print(js['mapper'])
+        print(js['mapper']['@namespace'])
+        print(js['mapper']['select'])
 
 
 if __name__ == '__main__':
