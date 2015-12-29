@@ -30,6 +30,14 @@ def where_parse(where_text, args):
     print(where_text)
     if_items = where_text.get('if', [])
     prefix = ' '+where_text.get('@prefixOverrides', 'AND')+' '
+    where = if_parse(if_items, args)
+    sql_where = prefix.join(where)
+    print(sql_where)
+    print('===================where end=================')
+    return ' where ' + sql_where
+
+
+def if_parse(if_items, args):
     where = []
     for item in if_items:
         print(item)
@@ -38,14 +46,7 @@ def where_parse(where_text, args):
             text = item.get('#text', None)
             if text:
                 where.append(text)
-    sql_where = prefix.join(where)
-    print(sql_where)
-    print('===================where end=================')
-    return ' where ' + sql_where
-
-
-def if_parse(if_text, args):
-    pass
+    return where
 
 
 if __name__ == '__main__':
