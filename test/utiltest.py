@@ -1,6 +1,6 @@
 import re
 
-from utils.xmlpaseutil import xml_parse
+from core.utils import xml_parse
 
 __author__ = 'sunshine'
 
