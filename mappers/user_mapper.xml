@@ -1,0 +1,5 @@
+<mapper namespace="models.user">
+    <select id="select_user_by_id" parameter_type="User" result_type="User">
+        select * from ebt_user where ebf_user_account=${user_account}
+    </select>
+</mapper>

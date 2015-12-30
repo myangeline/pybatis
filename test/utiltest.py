@@ -1,6 +1,6 @@
 import re
 
-from core.utils import xml_parse
+from core.utils import xml_parse, scan_folder, filter_files
 
 __author__ = 'sunshine'
 
@@ -32,6 +32,17 @@ def test_xml_parse():
         print(js['mapper']['select'])
 
 
+def test_scan_folder():
+    print(scan_folder('E:\work\projects\pybatis\mappers'))
+
+
+def test_filter_folder():
+    content = filter_files('user', 'E:\work\projects\pybatis\mappers')
+    print(content)
+
+
 if __name__ == '__main__':
-    test_xml_parse()
+    # test_xml_parse()
+    # test_scan_folder()
+    test_filter_folder()
     pass

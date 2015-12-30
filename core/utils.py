@@ -1,3 +1,4 @@
+import os
 from _threading_local import local
 
 import xmltodict
@@ -160,3 +161,13 @@ def read_file(name, mode='r', encoding='utf-8'):
 
 def xml_parse(xml_doc, encoding='utf-8'):
     return xmltodict.parse(xml_doc, encoding)
+
+
+def scan_folder(folder_name):
+    files = os.listdir(folder_name)
+    return files
+
+
+def filter_file(name, folder_path):
+    return read_file(os.path.join(folder_path, name))
+
