@@ -1,5 +1,25 @@
 <mapper namespace="models.user">
-    <select id="select_user_by_id" parameter_type="User" result_type="User">
+    <select id="select_user_by_id" parameter_type="User" result_type="User" field_prefix="ebf_">
         select * from ebt_user where ebf_user_account=${user_account}
+    </select>
+    <select id="select_all" result_type="User" field_prefix="ebf_">
+        select * from ebt_user
+    </select>
+    <select id="abc">
+        select * from tb_user
+        <where prefixOverrides="AND">
+            <if test="age>10"> age = ${age}</if>
+        </where>
+        order by id
+    </select>
+    <select id="select_user">
+        select * from tb_user
+        <where prefixOverrides="AND">
+            <if test="age>10"> age = ${age}</if>
+        </where>
+        order by id
+    </select>
+    <select id="select_user_by_id">
+        select * from ebt_user where ebf_user_id=${user_id}
     </select>
 </mapper>

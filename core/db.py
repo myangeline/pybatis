@@ -63,28 +63,29 @@ class CreateConnectPool:
         if self.filter_crud(crud):
             # 可以考虑初始化的时候一次全部读入内存，就是不知道会不会有问题
             xml = filter_file(mapper_name, self.folder)
-            sql, args, namespace, result_type = mapping_xml2sql(xml, crud, crud_id, kwargs)
-            print(sql, args, namespace, result_type)
-            # 如果 namespace, result_type都不是空，则是映射成指定对象
-            module = __import__(namespace, globals(), locals(), [result_type])
-            cls = getattr(module, result_type)
-            print(cls)
-            args = [str(arg) for arg in args]
-            print(args)
+            sql, args, namespace, result_type, field_prefix = mapping_xml2sql(xml, crud, crud_id, kwargs)
             if sql:
                 if crud == 'select':
-                    return self.execute_select(sql, args, cls, fetchone)
+                    if namespace and result_type:
+                        # 如果 namespace, result_type都不是空，则是映射成指定对象
+                        module = __import__(namespace, globals(), locals(), [result_type])
+                        cls = getattr(module, result_type)
+                    else:
+                        cls = None
+                    args = [str(arg) for arg in args]
+                    return self.execute_select(sql, args, cls, field_prefix, fetchone)
                 else:
                     return self.execute_update(sql, args)
             else:
                 return None
 
-    def execute_select(self, sql, args=None, cls=None, fetchone=True):
+    def execute_select(self, sql, args=None, cls=None, field_prefix=None, fetchone=True):
         """
         执行查询语句
         :param sql:
         :param args:
         :param cls:
+        :param field_prefix:
         :param fetchone:
         :return:
         """
@@ -92,28 +93,40 @@ class CreateConnectPool:
             args = []
         conn = self.get_connect()
         cursor = conn.cursor()
-        # todo 在使用了DBUtils以后，所获取的到连接都不是pymysql原来的conn, 在执行的时候没有进行参数检查，很可能存在 sql injection
-        # todo 原来使用动态参数绑定就可以了
+        # todo 原来使用动态参数绑定就可是安全的
         cursor.execute(sql, args)
         if cls is None:
             res = cursor.fetchone() if fetchone else cursor.fetchall()
         else:
             if fetchone:
                 item = cursor.fetchone()
-                if item:
+                if item and cls:
                     res = cls()
-                    for k, v in item.items():
-                        setattr(res, k, v)
+                    fields = cls().__dict__
+                    for k in fields:
+                        if field_prefix:
+                            key = field_prefix+k
+                        else:
+                            key = k
+                        setattr(res, k, item.get(key))
                 else:
-                    res = None
+                    res = item
             else:
                 items = cursor.fetchall()
                 res = []
-                for item in items:
-                    c = cls()
-                    for k, v in item.items():
-                        setattr(c, k, v)
-                    res.append(c)
+                if cls:
+                    fields = cls().__dict__
+                    for item in items:
+                        c = cls()
+                        for k in fields:
+                            if field_prefix:
+                                key = field_prefix+k
+                            else:
+                                key = k
+                            setattr(c, k, item.get(key))
+                        res.append(c)
+                else:
+                    res = items
         cursor.close()
         conn.close()
         return res
@@ -145,16 +158,9 @@ if __name__ == '__main__':
             db='ebdb_smartsys',
             charset='utf8',
             cursorclass=pymysql.cursors.DictCursor)
-    res = pool.execute_sql('user_mapper.xml', 'select', 'select_user_by_id', {'user_account': 1})
-    print(res.__dict__)
-    # user = User()
-    # res = pool.execute_sql('user_mapper.xml', 'select', 'select_user_by_id', user, False)
+    # res = pool.execute_sql('user_mapper.xml', 'select', 'select_user_by_id', {'user_account': 1}, False)
+    res = pool.execute_sql('user_mapper.xml', 'select', 'select_all', {}, False)
     print(res)
-    # conn = pool.get_connect()
-    # cur = conn.cursor()
-    # cur.execute("select * from ebt_user where ebf_user_id='1'")
-    # res = cur.fetchone()
-    # print(res)
-    # cur.close()
-    # conn.close()
+    for r in res:
+        print(r.user_account)
     pass
