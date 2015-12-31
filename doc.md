@@ -63,6 +63,32 @@ xml预先写好，条件也设定好，根据传来的参数去自动判断哪�
     </mapper>
 
 
-## 4. 总结
+## 4. 使用
+那么，怎么使用呢，很简单的，这个里面我使用了数据库连接池 `DBUtils` 这个第三方库，可以提高连接速度。
+
+首先，需要先创建一个连接池对象：
+
+    pool = CreateConnectPool(
+                'E:\work\projects\pybatis\mappers',
+                pymysql, 5,
+                host='192.168.0.62',
+                port=3306,
+                user='root',
+                passwd='53iq.com',
+                db='ebdb_smartsys',
+                charset='utf8',
+                cursorclass=pymysql.cursors.DictCursor)
+
+连接池第一个参数是你写好的xml的映射文件的目录，所以在这里需要将所有的xml文件写在一个文件夹下，因为这里只能写一个目录，以后看来得改改，做成list就好了
+第二个以后就都是 `PooledDB` 这个类的参数了，这是 `DBUtils` 的用到，自己查找资料了...
+
+然后就是执行查询的操作了：
+
+    # res = pool.execute_sql(mapper_name, tag, tag_name, kwargs, fetchone=True)
+    res = pool.execute_sql('user_mapper.xml', 'select', 'select_all', {}, False)
+
+多了我不写了，代码很简单，看看就懂了，参数有点多，写全太累了
+
+## 5. 总结
 这个也就是一个从xml到sql语句的映射工具，没什么厉害的功能，而且限制比较多，毕竟水平有限，也就是写来玩玩，练个手，不过我觉得拼接sql语句真的是一件痛苦而且无聊的事，
 所以我真的很希望有一个还用的库，早日摆脱这个玩意...
