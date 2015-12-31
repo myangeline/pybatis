@@ -4,8 +4,6 @@ from core.utils import xml_parse
 
 __author__ = 'sunshine'
 
-# 正确的做法应该是，将需要拼接的sql语句使用类似mybatis的形式用xml配置好，这样就比较好了
-
 
 def mapping_xml2sql(xml, tag, tag_id, kwargs=None):
     m = re.match(r'<mapper\s+namespace\s*=\s*["|\'](.+?)["|\']\s*>', xml)
